@@ -1,0 +1,15 @@
+{
+  "name": "web-go-dns-edit",
+  "version": "1.0.0",
+  "description": "Change the IP of an existing DNS entrie at Webgo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Stefan Böbel",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "puppeteer": "^13.5.1"
+  }
+}
