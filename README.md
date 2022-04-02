@@ -1,8 +1,6 @@
 # Use Webgo as a Dynamic DNS service
-This script use Puppeteer for change the DNS entrie of on Ip address in the web gui of webgo.de.
-Puppeteer is a Google Chromium application for server side automation in Nodejs.
-The script get the public ip of on third party public servive and change the DNS settings at webgo.de
-The side is not very comfortable to script. THis script only works as long as Webgo doesn't change there website.
+This script uses Puppeteer to change the DNS entry of an IP address in the webgui of webgo.de. Puppeteer is a Google Chromium application for server-side automation in Nodejs. The script fetches the public IP of a third party and changes the DNS settings at webgo.de. The page is not very comfortable to script. The script only works as long as webgo does not change its website.
+
 
 ## Requirements
 - Nodejs
