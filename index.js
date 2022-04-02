@@ -14,7 +14,7 @@ const axios = require("axios");
 
 require('dotenv').config();
 
-const isDebbug = false;
+const isDebbug = true;
 
 /**
  * Get the public Ip address from api.ipify.org
@@ -179,10 +179,23 @@ const getDnsZoneLink = async ({ page, domain = '' })  => {
   await Promise.all([
     page.waitForNavigation(),
     page.click("input[type=submit]"),
-
   ]);
 
-  // Save the changes
-  await page.goto(linkDnsZoneEdit + "/ok")
+  if (isDebbug) await page.screenshot({ path: './screenshots/submitIp.png' });
+
+  // Get confirm link by string manipulation
+  const commitLink = linkDnsZoneEdit.split("/");
+  commitLink[4] = "domainDnsDo";
+  commitLink.push("ok");
+
+  
+  // Confirm the changes
+  await Promise.all([
+    page.waitForNavigation(),
+    await page.goto(commitLink.join("/")),
+  ]);
+
+  if (isDebbug) await page.screenshot({ path: './screenshots/confirmChanges.png' });
+
   await browser.close();
 })();
