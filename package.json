@@ -1,6 +1,6 @@
 {
   "name": "web-go-dns-edit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Change the IP of an existing DNS entrie at Webgo",
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,8 @@
   "author": "Stefan Böbel",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
+    "axios": "^0.26.1",
+    "dotenv": "^16.0.0",
     "puppeteer": "^13.5.1"
   }
 }

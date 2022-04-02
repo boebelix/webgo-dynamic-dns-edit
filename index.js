@@ -1,9 +1,50 @@
+/**
+ * Author: Stefan Böbel
+ * Date: 2022-04-02
+ * Description: Puppeteer script for change the DNS entrie of on Ip address in the web gui of webgo.de.
+ * Puppeteer is a Google Chromium application for server side automation in Nodejs.
+ * The script get the public ip of on third party public servive and change the DNS settings at webgo.de
+ * The side is not very comfortable to script.
+ */
+
+'use strict';
+
 const puppeteer = require('puppeteer');
+const axios = require("axios");
+
+require('dotenv').config();
+
+const isDebbug = false;
+
+/**
+ * Get the public Ip address from api.ipify.org
+ * @function getPublicIp
+ * @private
+ * @return {String} Public Ip Address
+ */
+const getPublicIp = async () => {
+  try {
+    const response = await axios.get('https://api.ipify.org/');
+    const publicIp = response.data;
+    console.debug("Current public ip: " + publicIp);
+    return publicIp;
+  } catch (error) {
+    console.error("Error while fetch Ip from ipify.org" + error);
+  }
+};
 
 
-// How to pass parameter into puppeteer evalute
-// https://stackoverflow.com/a/46098448/14755959
-async function getDnsEditorLink({page, subdomain = ''}) {
+/**
+ * Get the link for DNS editor for specific subdomain.
+ * How to pass parameter into puppeteer evalute
+ * https://stackoverflow.com/a/46098448/14755959
+ * @function makeInits
+ * @private
+ * @param  {String} page        Injection of puppeteer object
+ * @param  {String} subdomain   The subdomain to change.
+ * @return {String}             Link from DNS Editor from Webgo 
+ */
+const getDnsEditorLink = async ({ page, subdomain = '' })  => {
 
   try {
     if (subdomain == '') throw 'Subdomain is empty';
@@ -32,11 +73,19 @@ async function getDnsEditorLink({page, subdomain = ''}) {
 }
 
 
-async function getDnsZoneLink({page, domain = ''})  {
-
+/**
+ * Get the link for DNS editor for specific subdomain.
+ * This link changes with every change.
+ * @function getDnsZoneLink
+ * @private
+ * @param  {String} page        Injection of puppeteer object
+ * @param  {String} domain      The domain to change.
+ * @return {String}             Link from DNS editor zone from Webgo 
+ */
+const getDnsZoneLink = async ({ page, domain = '' })  => {
   try {
     if (domain == '') throw 'Domain is empty';
-    await page.screenshot({ path: './screenshots/getDnsZone.png' });
+    if (isDebbug) await page.screenshot({ path: './screenshots/getDnsZone.png' });
 
     return await page.evaluate(function (domain) {
       const dnsTable = document.querySelector('.alltable');
@@ -62,15 +111,23 @@ async function getDnsZoneLink({page, domain = ''})  {
 }
 
 
+/**
+ * Puppeteer script for change the DNS entrie of on Ip address in the web gui of webgo.de
+ * The script get the public ip of on third party public servive.
+ * The side is not very comfortable to script.
+ */
 (async () => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  await page.goto('https://login.webgo.de/login');
 
-  await page.type('#UserUsername', {{username}});
-  await page.type('#UserPassword', {{password}});
+  await page.goto(process.env.WEBGO_LOGIN_PAGE);
 
+  // Load credentials from enviroment file
+  await page.type('#UserUsername', process.env.USER_NAME);
+  await page.type('#UserPassword', process.env.USER_PASSWORD);
+
+  // Wait until side is loaded to be continue
   await Promise.all([
     page.waitForNavigation(),
     page.click("button[type=submit]"),
@@ -78,33 +135,54 @@ async function getDnsZoneLink({page, domain = ''})  {
   ]);
 
 
-  await page.screenshot({ path: './screenshots/exampleLogin.png' });
-  await page.goto('https://login.webgo.de/domains');
+  if (isDebbug) await page.screenshot({ path: './screenshots/exampleLogin.png' });
 
+  await page.goto(process.env.WEBGO_DOMAIN_PAGE);
+
+
+  // Get changeable link for DNS zone 
   const linkDnsZoneEdit = await getDnsZoneLink({
     page: page,
-    domain: 'boebelix.de',
+    domain: process.env.DOMAIN,
   });
 
-  console.log(linkDnsZoneEdit);
-
+  console.debug("Link to DNS zone edit: " + linkDnsZoneEdit);
 
   await page.goto(linkDnsZoneEdit);
 
 
 
-
+  // Get changeable link for DNS edit
   const linkDnsEdit = await getDnsEditorLink({
     page: page,
-    subdomain: 'web1',
+    subdomain: process.env.SUB_DOMAIN,
   });
 
-  console.log(linkDnsEdit);
+  console.debug("Link DNS Edit: " + linkDnsEdit);
+
+  await page.goto(linkDnsEdit);
+
+  if (isDebbug) await page.screenshot({ path: './screenshots/exampleGotoEditDns.png' });
 
 
+  const dnsSettingsSelector = await page.$('#DnsSettingValue');
 
+  // Doesn't work
+  // dnsSettingsSelector.value = getPublicIp();
+  // Work arround, 3 times click for mark the text and change type ip in the input field
+  await dnsSettingsSelector.click({ clickCount: 3 });
+  if (isDebbug) await page.screenshot({ path: './screenshots/click3times.png' });
+  await dnsSettingsSelector.type(await getPublicIp());
+  if (isDebbug) await page.screenshot({ path: './screenshots/exampleNewIp.png' });
 
-  await page.screenshot({ path: './screenshots/exampleGotoEditDns.png' });
+  // Submit new Ip address
+  await Promise.all([
+    page.waitForNavigation(),
+    page.click("input[type=submit]"),
 
+  ]);
+
+  // Save the changes
+  await page.goto(linkDnsZoneEdit + "/ok")
   await browser.close();
 })();
