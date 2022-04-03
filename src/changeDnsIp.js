@@ -5,8 +5,8 @@ const publicIpApi = require('./publicIpApi');
 
 require('dotenv').config();
 
-const isDebbug = true;
 
+const isDebbug = false;
 
 
 /**
@@ -92,7 +92,18 @@ const getDnsZoneLink = async ({ page, domain = '' }) => {
  * The side is not very comfortable to script.
  */
 const run = async (newIp) => {
-  const browser = await puppeteer.launch();
+
+  // Initialize puppeteer
+  const browser = await puppeteer.launch({
+    // This arguments is necessary for container runtime like docker 
+    args: [
+      "--disable-gpu",
+      "--disable-dev-shm-usage",
+      "--disable-setuid-sandbox",
+      "--no-sandbox",
+    ],
+  });
+
   const page = await browser.newPage();
 
 

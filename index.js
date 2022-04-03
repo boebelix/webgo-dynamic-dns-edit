@@ -13,21 +13,21 @@ const changeDnsIp = require("./src/changeDnsIp");
 const publicIpApi = require('./src/publicIpApi');
 
 let currentDnsIpEntry = "";
-let publicIP = "";
+let publicIp = "";
 
 /**
  * The script checks in the given time interval if the ip has changed. At the initial start
  * the script is executed once and checks from then on only if the ip has changed.
  */
 setInterval(async () => {
-  publicIP = await publicIpApi.getPublicIp();
+  publicIp = await publicIpApi.getPublicIp();
 
-  console.debug("Current Dns Ip Entry: " + currentDnsIpEntry + " publicIp: " + publicIP);
+  console.debug("Current Dns Ip Entry: " + currentDnsIpEntry + " publicIp: " + publicIp);
 
-  if (currentDnsIpEntry !== publicIP) {
-    console.debug("IP has changed! Current Dns Ip Entry: " + currentDnsIpEntry + " publicIp: " + publicIP);
-    changeDnsIp.run(publicIP);
+  if (currentDnsIpEntry !== publicIp) {
+    console.debug("IP has changed! Current Dns Ip Entry: " + currentDnsIpEntry + " publicIp: " + publicIp);
+    changeDnsIp.run(publicIp);
   }
 
-  currentDnsIpEntry = publicIP;
-}, 64 * 1000); // 60 * 1000 milsec
+  currentDnsIpEntry = publicIp;
+}, 64 * 1000); // 64 * 1000 milsec

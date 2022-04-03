@@ -1,6 +1,6 @@
 {
   "name": "web-go-dns-edit",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Change the IP of an existing DNS entrie at Webgo",
   "main": "index.js",
   "scripts": {
