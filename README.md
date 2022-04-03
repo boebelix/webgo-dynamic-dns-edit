@@ -34,6 +34,6 @@ npm start
 ```
 
 ## Further tasks:
-- [ ]Uses the fritz.box native tool to detect IP address changes
-- [ ]Dockerize this nodejs application
-- [x]Check for new Ip every minute
+- [ ] Uses the fritz.box native tool to detect IP address changes
+- [ ] Dockerize this nodejs application
+- [x] Check for new Ip every minute
